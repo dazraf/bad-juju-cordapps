@@ -1,0 +1,181 @@
+@startuml
+
+skinparam shadowing false
+skinparam NoteBackgroundColor White
+
+skinparam class {
+	BackgroundColor White
+	ArrowColor SeaGreen
+  NoteBackgroundColor White
+}
+
+skinparam object {
+	BackgroundColor White
+	ArrowColor SeaGreen
+  NoteBackgroundColor White
+}
+
+
+' --- BEGIN Permissions ---
+
+object AccountAdminPermission
+object UserAdminPermission
+object BusinessAdminPermission
+object CurrencyAdminPermission
+
+' --- END Permissions ---
+
+
+' --- BEGIN Requests payloads ---
+
+
+interface Request {
+  nonce: Long
+}
+
+interface Response {
+  nonce: Long
+}
+
+class Authorised<Payload> {
+}
+
+
+AtomicRequest *--> "*" Request: has 2 or more
+AtomicResponse *--> "*" Response: has 2 or more
+
+
+interface Ledger {
+  invoke(request: Authorised<Request>) : Response
+}
+
+Ledger ..> Request: consumes
+Ledger ..> Response: responds with
+Ledger ..> Authorised: authorised by
+AtomicRequest --|> Request: is a
+AtomicResponse --|> Response: is a
+
+
+' --- END Request payloads ---
+
+' --- BEGIN Business ---
+
+class Business {
+  id: String
+  description: String
+}
+
+class CreateBusinessRequest {
+  ownerId: String
+}
+
+CreateBusinessRequest --|> Request
+CreateBusinessRequest ..> BusinessAdminPermission: requires
+
+' --- END Businesses ---
+
+
+
+' --- BEGIN Authentication ---
+
+class AuthenticatedUser {
+  token: String
+}
+
+class User {
+  userId: String
+}
+
+interface AuthService {
+  authenticate(credentials): AuthenticatedUser
+}
+
+AuthService ..> AuthenticatedUser : generates
+
+' --- BEGIN Accounts API ---
+
+class Account {
+}
+
+class CreateAccountRequest {
+}
+
+class AccountAddress {
+  accountId: String
+  functionalUnit: String
+  partyOrgName: String
+  toString()
+  {static} parse(address: String) : AccountAddress
+}
+note bottom: canonical way of addressing an account.\nSerialises to 'accountId@functionalUnit.party'
+
+CreateAccountRequest ..> AccountAdminPermission
+CreateAccountRequest ..> Account
+CreateAccountRequest --|> Request
+
+' --- END Accounts API ----
+
+' --- BEGIN Currency API ---
+
+class Currency {
+  symbol: String
+  description: String
+  decimalPlaces: Short
+}
+
+class ISOCurrency {
+  isoCode: Short
+}
+
+ISOCurrency --|> Currency
+
+class CreateCurrencyRequest
+
+CreateCurrencyRequest --|> Request
+CreateCurrencyRequest ..> Currency
+
+' --- END Currency API ---
+
+
+
+class Client {
+  clientId: String
+  name: String
+}
+
+class Tags {
+  clearTags()
+  addTag(tag: Tag)
+  containsTag(name: String): Boolean
+  getTag(name: String): Tag
+  removeTag(name: String): Tag
+}
+note right: general purpose\ntagging structure
+
+class Tag {
+  name: String
+  value: String
+}
+
+
+
+note bottom: the ownerId is either:\n* the ledger administrator or\n* a functionalUnit identifier
+
+
+
+Account *--> "1" AccountAddress: accountAddress
+Account *--> "1" Currency: currency
+Tags *--> "*" Tag: tags
+Client *--> "1" Tags: tags
+Account *--> "1" Tags: tags
+Authorised *--> "1" Request: payload
+Authorised *--> "1" AuthenticatedUser
+AuthenticatedUser *--> User
+User "*" <..> "*" Business
+User "*" <..> "*" Role
+Role "*" <..> "*" Permission
+AccountAdminPermission --|> Permission
+UserAdminPermission --|> Permission
+BusinessAdminPermission --|> Permission
+CurrencyAdminPermission --|> Permission
+@enduml

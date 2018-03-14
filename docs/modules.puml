@@ -1,0 +1,28 @@
+@startuml
+
+skinparam component {
+  FontSize 13
+  BackgroundColor<<Apache>> Red
+  BorderColor<<Apache>> #FF6655
+  FontName Courier
+  BorderColor black
+  BackgroundColor white
+  ArrowFontName Impact
+  ArrowColor black
+  ArrowFontColor black
+}
+
+[dao] --> [dgl]
+[metering] --> [dgl]
+[metering] -> [dao]
+
+[dao] --> [cordite-commons]
+[metering] --> [cordite-commons]
+[dgl] --> [cordite-commons]
+
+[cordite] --> [metering]
+[cordite] --> [dao]
+[cordite] --> [dgl]
+[cordite] -> [braid-corda]
+
+@enduml

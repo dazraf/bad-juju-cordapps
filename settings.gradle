@@ -1,0 +1,10 @@
+include 'dgl-cordapp'
+include 'dgl-contracts-states'
+include 'dao-cordapp'
+include 'dao-contracts-states'
+include 'metering-cordapp'
+include 'metering-contracts-states'
+include 'cordite-cordapp'
+include 'cordite-commons'
+include 'cordite-test-utils'
+

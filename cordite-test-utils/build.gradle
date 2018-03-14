@@ -1,0 +1,27 @@
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    maven { url 'http://bluebank-nexus.uksouth.cloudapp.azure.com/repository/maven-public'}
+    maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
+}
+
+apply plugin: 'kotlin'
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile project(":cordite-commons")
+    compile group: 'io.bluebank.braid', name: 'braid-client', version: "$braid_version", changing: true
+    compile group: "$corda_release_group", name: 'corda-test-utils', version: "$corda_release_version"
+    compile group: "$corda_release_group", name: 'corda-node-driver', version: "$corda_release_version"
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        languageVersion = "1.1"
+        apiVersion = "1.1"
+        jvmTarget = "1.8"
+        javaParameters = true   // Useful for reflection.
+    }
+}
